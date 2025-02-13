@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Valentine Proposal</title>
+  <style>
+    /* Basic reset */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    /* Body styling with gradient background and no scrollbars from hearts */
+    body {
+      overflow: hidden;
+      font-family: "Trebuchet MS", sans-serif;
+      background: linear-gradient(to bottom right, #ffc0cb, #ffb7b2, #ffeef0);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      position: relative; /* for absolute-positioned hearts, confetti, etc. */
+    }
+
+    /* Floating Hearts */
+    .heart {
+      position: absolute;
+      width: 20px;
+      height: 20px;
+      background-color: #e60073;
+      transform: rotate(45deg);
+      animation: floatUp 8s linear infinite;
+      opacity: 0.8;
+      border-radius: 20% 20% 0 0; 
+      z-index: 1; /* behind buttons & text */
+    }
+    .heart::before,
+    .heart::after {
+      content: "";
+      position: absolute;
+      width: 20px;
+      height: 20px;
+      background-color: #e60073;
+      border-radius: 50%;
+    }
+    .heart::before {
+      top: -10px;
+      left: 0;
+    }
+    .heart::after {
+      top: 0;
+      left: 10px;
+    }
+    @keyframes floatUp {
+      0% {
+        transform: translateY(0) rotate(45deg);
+        opacity: 0.8;
+      }
+      90% {
+        opacity: 0.2;
+      }
+      100% {
+        transform: translateY(-800px) rotate(45deg);
+        opacity: 0;
+      }
+    }
+
+    /* Pulsing Valentine heading */
+    h1 {
+      margin-bottom: 30px;
+      color: #e60073;
+      font-size: 2rem;
+      text-align: center;
+      animation: heartbeat 2s infinite;
+      z-index: 2; /* above hearts */
+    }
+    @keyframes heartbeat {
+      0%, 100% {
+        transform: scale(1);
+      }
+      15%, 45%, 60%, 75% {
+        transform: scale(1.1);
+      }
+    }
+
+    /* Buttons container */
+    .buttons {
+      position: relative;
+      width: 90%;
+      max-width: 350px;
+      height: 120px;
+      display: flex;
+      justify-content: space-evenly;
+      align-items: center;
+      z-index: 2; 
+    }
+
+    /* Buttons with hover scale effect */
+    button {
+      font-size: 16px;
+      padding: 10px 20px;
+      cursor: pointer;
+      border: none;
+      border-radius: 5px;
+      background-color: #ff66a3;
+      transition: transform 0.2s, top 0.2s, left 0.2s;
+    }
+    button:hover {
+      transform: scale(1.1);
+    }
+
+    /* Message area */
+    #message {
+      margin-top: 20px;
+      font-size: 24px;
+      color: #e60073;
+      min-height: 30px;
+      z-index: 2;
+      text-align: center;
+      transition: transform 0.3s; /* used for progressive scale changes */
+    }
+
+    /* Zoom in/out keyframes for "MWHAMWAHA" text */
+    @keyframes zoomInOut {
+      0%   { transform: scale(1); }
+      30%  { transform: scale(2); }
+      60%  { transform: scale(0.5); }
+      100% { transform: scale(1); }
+    }
+    .zoom-animation {
+      animation: zoomInOut 1.2s forwards;
+    }
+
+    /* Confetti styles */
+    .confetti {
+      position: absolute;
+      width: 8px;
+      height: 8px;
+      background-color: #fff;
+      border-radius: 50%;
+      animation: confettiFall 2s ease-out forwards;
+      z-index: 3; /* above everything */
+    }
+    @keyframes confettiFall {
+      0% {
+        opacity: 1;
+        transform: translateY(0) rotate(0deg);
+      }
+      100% {
+        opacity: 0;
+        transform: translateY(600px) rotate(720deg);
+      }
+    }
+
+    /* Responsive adjustments for smaller screens */
+    @media (max-width: 480px) {
+      h1 {
+        font-size: 1.5rem;
+      }
+      button {
+        font-size: 14px;
+        padding: 8px 16px;
+      }
+      .buttons {
+        height: 100px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- Floating hearts with different delays -->
+  <div class="heart" style="top: 90%; left: 10%; animation-delay: 0s;"></div>
+  <div class="heart" style="top: 95%; left: 30%; animation-delay: 2s;"></div>
+  <div class="heart" style="top: 92%; left: 50%; animation-delay: 1s;"></div>
+  <div class="heart" style="top: 98%; left: 70%; animation-delay: 4s;"></div>
+  <div class="heart" style="top: 93%; left: 85%; animation-delay: 3s;"></div>
+  <div class="heart" style="top: 97%; left: 25%; animation-delay: 5s;"></div>
+
+  <h1>Will you be my Valentine?</h1>
+
+  <div class="buttons">
+    <button id="yes-btn">Yes</button>
+    <button id="no-btn">No</button>
+  </div>
+
+  <div id="message"></div>
+
+  <script>
+    const yesBtn = document.getElementById("yes-btn");
+    const noBtn = document.getElementById("no-btn");
+    const message = document.getElementById("message");
+    const container = document.querySelector(".buttons");
+
+    // Keep track of how many times the user attempts to click "No"
+    let noAttempts = 0;
+
+    // YES button -> Confetti + "MWHAMWAHA" with zoom
+    yesBtn.addEventListener("click", () => {
+      message.textContent = "MWHAMWAHA, I LOVE YOU SO MUCH BABYYY MWAHWAMWHA :>>>>>";
+      message.classList.remove("zoom-animation"); // reset if multiple clicks
+      void message.offsetWidth; // reflow trick to restart animation
+      message.classList.add("zoom-animation");
+      createConfetti();
+    });
+
+    // NO button -> Move away + show progressively bigger "ARE YOU SURE??..." message
+    function handleNoAttempt() {
+      // Move the "No" button to a random position within its container
+      noBtn.style.position = "absolute";
+      const containerWidth = container.offsetWidth;
+      const containerHeight = container.offsetHeight;
+      const randomLeft = Math.random() * (containerWidth - noBtn.offsetWidth);
+      const randomTop = Math.random() * (containerHeight - noBtn.offsetHeight);
+      noBtn.style.left = randomLeft + "px";
+      noBtn.style.top = randomTop + "px";
+
+      // Increase noAttempts count
+      noAttempts++;
+
+      // Show "ARE YOU SURE???" with progressively more question marks
+      let questionMarks = "?".repeat(noAttempts);
+      message.textContent = `ARE YOU SURE${questionMarks}`;
+
+      // Scale up the message slightly each time
+      // Base scale at 1, then add +0.2 for each noAttempt
+      message.style.transform = `scale(${1 + noAttempts * 0.2})`;
+    }
+
+    // Desktop "hover" moves the button away
+    noBtn.addEventListener("mouseover", handleNoAttempt);
+
+    // Mobile "touchstart" to move the button away & show message
+    noBtn.addEventListener("touchstart", (e) => {
+      e.preventDefault(); // prevent click if tapping quickly
+      handleNoAttempt();
+    });
+
+    /**
+     * Creates a burst of confetti elements that fall downward near the "Yes" button.
+     */
+    function createConfetti() {
+      const colors = ["#ff66a3", "#e60073", "#ff69b4", "#ffc0cb", "#ffffff"];
+      const numConfetti = 25;
+
+      // Get center position of the "Yes" button for confetti start
+      const yesBtnRect = yesBtn.getBoundingClientRect();
+      const xStart = yesBtnRect.left + (yesBtnRect.width / 2);
+      const yStart = yesBtnRect.top;
+
+      for (let i = 0; i < numConfetti; i++) {
+        const confettiEl = document.createElement("div");
+        confettiEl.classList.add("confetti");
+        document.body.appendChild(confettiEl);
+
+        // Position confetti at the center of "Yes" button
+        confettiEl.style.left = xStart + "px";
+        confettiEl.style.top = yStart + "px";
+
+        // Random color
+        const colorIndex = Math.floor(Math.random() * colors.length);
+        confettiEl.style.backgroundColor = colors[colorIndex];
+
+        // Slight random offset so confetti pieces start offset
+        confettiEl.style.transform = `translate(${Math.random()*20 - 10}px, ${Math.random()*20 -10}px)`;
+
+        // Remove confetti after animation
+        confettiEl.addEventListener("animationend", () => {
+          confettiEl.remove();
+        });
+      }
+    }
+  </script>
+</body>
+</html>
